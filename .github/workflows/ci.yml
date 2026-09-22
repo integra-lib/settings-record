@@ -1,0 +1,27 @@
+# settings_record depends on another component, and on GitHub its pipeline cannot
+# get it: crc is a private repository of this organisation, and the default
+# GITHUB_TOKEN reaches its own repository only. The standalone build fetches it and
+# dies with
+#   fatal: Could not read from remote repository.
+# so there is nothing here that could honestly be made green.
+#
+# GitHub is a staging ground; GitLab is the target, and there a job token can reach
+# sibling projects of the same group (subject to the project's job-token allowlist).
+# The GitLab pipeline in .gitlab-ci.yml covers this component.
+#
+# Until then the component is verified locally — the test suite under gcc and clang
+# against the real crc component.
+
+name: ci
+
+on:
+  workflow_dispatch:
+
+jobs:
+  note:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Not run on GitHub: the private crc component is unreachable" >&2
+          echo "from a workflow token. See the comment in this file." >&2
+          exit 1
