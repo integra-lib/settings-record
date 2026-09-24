@@ -1,5 +1,5 @@
 {
-  "name": "integra-settings-record",
+  "name": "hwlib-settings-record",
   "private": true,
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",

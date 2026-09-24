@@ -2,23 +2,23 @@
 
 A checksummed settings record: write a payload to a key-value store, read it back only if it verifies.
 
-Part of [integra-lib](https://github.com/integra-lib) — architecture-independent C++20
+Part of [hwlib](https://github.com/integra-lib) — architecture-independent C++20
 components shared between firmware projects. Header-only,
 no exceptions, no RTTI.
 
 ## Use it
 
 ```bash
-git submodule add git@github.com:integra-lib/settings-record.git external/integra/settings-record
+git submodule add git@github.com:integra-lib/settings-record.git external/hwlib/settings-record
 ```
 
 ```cmake
-add_subdirectory(external/integra/settings-record)
-target_link_libraries(app PRIVATE Integra::settings_record)
+add_subdirectory(external/hwlib/settings-record)
+target_link_libraries(app PRIVATE Hwlib::settings_record)
 ```
 
 ```cpp
-#include <integra/settings_record.hpp>
+#include <hwlib/persistence/settings_record.hpp>
 ```
 
 Each component carries its own include directory, so this header stays unreachable
@@ -30,15 +30,15 @@ a build that happens to work.
 One other component, added **next to** this one rather than inside it, so that a
 consumer never ends up with two copies of the same component:
 
-* `Integra::crc` >= 0.1.0, < 0.2.0
+* `Hwlib::crc` >= 0.1.0, < 0.2.0
 
 ```bash
-git submodule add git@github.com:integra-lib/crc.git external/integra/crc
+git submodule add git@github.com:integra-lib/crc.git external/hwlib/crc
 ```
 
 ```cmake
-add_subdirectory(external/integra/crc)
-add_subdirectory(external/integra/settings-record)
+add_subdirectory(external/hwlib/crc)
+add_subdirectory(external/hwlib/settings-record)
 ```
 
 A missing or out-of-range dependency stops the CMake configure with a message naming
@@ -47,7 +47,7 @@ the component and the version found.
 ## The storage is yours
 
 The component owns the record format, not the medium. A storage satisfies
-`integra::RecordStorageLike`:
+`hwlib::persistence::RecordStorageLike`:
 
 ```cpp
 bool Write(std::uint16_t id, std::span<const std::uint8_t> data);
@@ -67,7 +67,7 @@ struct Calibration
 
 constexpr std::uint16_t CALIBRATION_ID = 7U;
 
-if (!integra::WriteSettingsRecord(storage, CALIBRATION_ID, calibration))
+if (!hwlib::persistence::WriteSettingsRecord(storage, CALIBRATION_ID, calibration))
 {
     LOG_ERR("calibration not saved");
 }
@@ -75,7 +75,7 @@ if (!integra::WriteSettingsRecord(storage, CALIBRATION_ID, calibration))
 Calibration calibration{DEFAULT_CALIBRATION};
 // Left untouched when the record is missing or does not verify, so the default
 // survives a first boot and a corrupted cell alike.
-std::ignore = integra::ReadSettingsRecord(storage, CALIBRATION_ID, calibration);
+std::ignore = hwlib::persistence::ReadSettingsRecord(storage, CALIBRATION_ID, calibration);
 ```
 
 ## What the checksum is for
@@ -96,9 +96,9 @@ Every component is released on its own, tagged `vX.Y.Z`. Pre-1.0, a minor releas
 break the API, which is why dependants accept a single minor.
 
 ```bash
-git -C external/integra/settings-record fetch --tags
-git -C external/integra/settings-record checkout v0.2.0
-git add external/integra/settings-record && git commit -m "build: bump settings-record to v0.2.0"
+git -C external/hwlib/settings-record fetch --tags
+git -C external/hwlib/settings-record checkout v0.2.0
+git add external/hwlib/settings-record && git commit -m "build: bump settings-record to v0.2.0"
 ```
 
 ## Coming from a174-hardware's settings-storage
@@ -107,7 +107,7 @@ The record format is unchanged — a `std::uint32_t` checksum, then the payload,
 checksum covering the payload only — so records already on a device still read back.
 Two things did change:
 
-* `CalcCrc` is gone; the checksum comes from `Integra::crc`. It is the same
+* `CalcCrc` is gone; the checksum comes from `Hwlib::crc`. It is the same
   CRC-32/ISO-HDLC, and a test pins it against both the catalogue's check value and
   the original's hand-written loop.
 * the storage contract takes `std::span` instead of `const void*` plus a length, so
@@ -138,7 +138,7 @@ cmake -S . -B build && cmake --build build -j && ctest --test-dir build
 ```
 
 A standalone build fetches `crc` itself, at the version this component was verified
-against; point `-DINTEGRA_REMOTE=` elsewhere to build against a different remote.
+against; point `-DHWLIB_REMOTE=` elsewhere to build against a different remote.
 Tests are built only when this repository is the top-level project, so a consumer
 never builds them and never fetches GoogleTest.
 

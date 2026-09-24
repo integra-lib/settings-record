@@ -4,11 +4,11 @@
 #include <bit>
 #include <concepts>
 #include <cstdint>
-#include <integra/crc.hpp>
+#include <hwlib/algorithms/crc.hpp>
 #include <span>
 #include <type_traits>
 
-namespace integra
+namespace hwlib::persistence
 {
 
 /// The key-value storage a record is kept in: an identifier addresses one blob of
@@ -69,7 +69,7 @@ template<RecordStorageLike Storage, typename Payload>
     // Value-initialised above, so the payload's own padding is zero rather than
     // whatever the stack held — otherwise the same setting could be written twice
     // with two different checksums.
-    record.crc = Crc32IsoHdlc(detail::ObjectBytes(record.payload));
+    record.crc = hwlib::algorithms::Crc32IsoHdlc(detail::ObjectBytes(record.payload));
 
     const auto bytes = detail::ObjectBytes(record);
     return storage.Write(id, bytes);
@@ -91,7 +91,7 @@ template<RecordStorageLike Storage, typename Payload>
     }
 
     const auto record = std::bit_cast<SettingsRecord<Payload>>(bytes);
-    if (record.crc != Crc32IsoHdlc(detail::ObjectBytes(record.payload)))
+    if (record.crc != hwlib::algorithms::Crc32IsoHdlc(detail::ObjectBytes(record.payload)))
     {
         return false;
     }
@@ -100,4 +100,4 @@ template<RecordStorageLike Storage, typename Payload>
     return true;
 }
 
-} // namespace integra
+} // namespace hwlib::persistence

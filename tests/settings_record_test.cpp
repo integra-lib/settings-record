@@ -4,7 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <integra/settings_record.hpp>
+#include <hwlib/persistence/settings_record.hpp>
 #include <map>
 #include <span>
 #include <string_view>
@@ -13,9 +13,9 @@
 namespace
 {
 
-using integra::ReadSettingsRecord;
-using integra::SettingsRecord;
-using integra::WriteSettingsRecord;
+using hwlib::persistence::ReadSettingsRecord;
+using hwlib::persistence::SettingsRecord;
+using hwlib::persistence::WriteSettingsRecord;
 
 // Stand-in for the device's flash-backed store.
 class FakeStorage
@@ -74,7 +74,7 @@ struct Calibration
 constexpr std::uint16_t RECORD_ID = 7U;
 
 // The checksum a174-hardware's settings-storage wrote, bit for bit: CRC-32/ISO-HDLC
-// spelled out by hand. Kept here so a change to Integra::crc that moved this
+// spelled out by hand. Kept here so a change to Hwlib::crc that moved this
 // component to a different checksum could not pass unnoticed — devices in the field
 // already hold records written with this one.
 [[nodiscard]] std::uint32_t LegacyCalcCrc(std::span<const std::uint8_t> bytes)
@@ -175,7 +175,7 @@ TEST(SettingsRecordTest, ComputesTheCheckAgainstTheCatalogueVector)
         reinterpret_cast<const std::uint8_t*>(CHECK_INPUT.data()), CHECK_INPUT.size()};
 
     EXPECT_EQ(LegacyCalcCrc(bytes), 0xCBF43926U);
-    EXPECT_EQ(integra::Crc32IsoHdlc(bytes), 0xCBF43926U);
+    EXPECT_EQ(hwlib::algorithms::Crc32IsoHdlc(bytes), 0xCBF43926U);
 }
 
 TEST(SettingsRecordTest, TellsTwoPayloadsApartThroughTheSameId)
