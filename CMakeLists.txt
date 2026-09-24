@@ -11,13 +11,13 @@ project(
 if(PROJECT_IS_TOP_LEVEL AND NOT TARGET Integra::crc)
   include(FetchContent)
   set(INTEGRA_REMOTE
-      "git@gitlab.integrasources.com:6111/internal-projects/integra-lib"
+      "https://gitlab.integrasources.com/internal-projects/a000-hwlib"
       CACHE
         STRING
         "Base URL the sibling component is fetched from in standalone builds")
   FetchContent_Declare(
     integra_crc
-    GIT_REPOSITORY ${INTEGRA_REMOTE}/crc.git
+    GIT_REPOSITORY ${INTEGRA_REMOTE}/algorithms/crc.git
     GIT_TAG v0.1.0)
   FetchContent_MakeAvailable(integra_crc)
 endif()
